@@ -1,14 +1,26 @@
 # put here your custom config value
-menu "Example Configuration"
-config ESP_WIFI_SSID
+menu "IPS Configuration"
+config WIFI_SSID
     string "WiFi SSID"
     default "myssid"
     help
-	SSID (network name) for the example to connect to.
+	SSID (network name) for the esp to connect to.
 
-config ESP_WIFI_PASSWORD
+config WIFI_PASSWORD
     string "WiFi Password"
     default "mypassword"
     help
-	WiFi password (WPA or WPA2) for the example to use.
+	WiFi password (WPA or WPA2) for the esp to connect to.
+
+config MQTT_HOST
+    string "MQTT Host"
+    default "1.1.1.1"
+    help
+    MQTT broker host for the esp to connect to.
+
+config MQTT_PORT
+    string "MQTT Port"
+    default "1883"
+    help
+    MQTT broker port.
 endmenu
