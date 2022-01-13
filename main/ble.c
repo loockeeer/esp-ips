@@ -12,9 +12,9 @@
 #include "ble.h"
 #include "main.h"
 
-#define CARMODE 0
-#define ANTENNAMODE_INIT 1
-#define ANTENNAMODE_RUN 2
+#define BEACONMODE 0
+#define STATIONMODE_INIT 1
+#define STATIONMODE_RUN 2
 #define IDLE_MODE 3
 
 #define ACK 4
@@ -60,7 +60,7 @@ void mqtt_callback(void *handler_args, esp_event_base_t base, int32_t event_id, 
         previous_mode = mode;
         mode = command;
         printf("Received new mode : %s (%i)\n",
-               mode == CARMODE ? "CAR" : mode == ANTENNAMODE_RUN ? "ANTENNA (RUN)" : mode == ANTENNAMODE_INIT ? "ANTENNA (INIT)" : "undefined", mode);
+               mode == BEACONMODE ? "BEACON" : mode == STATIONMODE_RUN ? "STATION (RUN)" : mode == STATIONMODE_INIT ? "STATION (INIT)" : "undefined", mode);
     }
 
     esp_mqtt_client_publish(mqttClient, topic_cc, "4", 1, 2, 0);
@@ -88,22 +88,22 @@ _Noreturn void init_mqtt() {
     println("Listening for orders from cc (all and device only)");
 
     while (true) {
-        if ((previous_mode == ANTENNAMODE_INIT && mode != ANTENNAMODE_INIT) || (previous_mode == CARMODE && mode != CARMODE)) {
+        if ((previous_mode == STATIONMODE_INIT && mode != STATIONMODE_INIT) || (previous_mode == BEACONMODE && mode != BEACONMODE)) {
             esp_ble_gap_stop_advertising();
             vTaskDelay(500 / portTICK_PERIOD_MS);
         }
         switch (mode) {
-            case CARMODE:
+            case BEACONMODE:
                 if (previous_mode != mode) {
-                    println("Switching to car mode");
+                    println("Switching to beacon mode");
                     ESP_ERROR_CHECK(esp_ble_gap_start_advertising(&adv_params));
                     previous_mode = mode;
                 }
                 vTaskDelay(500 / portTICK_PERIOD_MS);
                 break;
-            case ANTENNAMODE_INIT:
+            case STATIONMODE_INIT:
                 if (previous_mode != mode) {
-                    println("Switching to antenna mode (init)");
+                    println("Switching to station mode (init)");
                     static esp_ble_scan_params_t scan_params = {
                             .own_addr_type          = BLE_ADDR_TYPE_RPA_PUBLIC,
                             .scan_duplicate         = BLE_SCAN_DUPLICATE_ENABLE,
@@ -116,9 +116,9 @@ _Noreturn void init_mqtt() {
                 ESP_ERROR_CHECK(esp_ble_gap_start_scanning(5));
                 vTaskDelay(5100 / portTICK_PERIOD_MS);
                 break;
-            case ANTENNAMODE_RUN:
+            case STATIONMODE_RUN:
                 if (previous_mode != mode) {
-                    println("Switching to antenna mode (run)");
+                    println("Switching to station mode (run)");
                     static esp_ble_scan_params_t scan_params = {
                             .own_addr_type          = BLE_ADDR_TYPE_RPA_PUBLIC,
                             .scan_duplicate         = BLE_SCAN_DUPLICATE_ENABLE,
